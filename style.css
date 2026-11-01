@@ -104,7 +104,7 @@ ul.liste { margin: 0 0 14px 28px; }
     height: 480px;
     border-radius: 60px;
     overflow: hidden;
-    background: #7a4b2a url("epices.jpg") center / cover;
+    background: #7a4b2a url("epices.webp") center / cover;
 }
 .hero-texte {
     position: absolute;
