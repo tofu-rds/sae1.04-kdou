@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <title>KDou - Requêtes &amp; Indicateurs</title>
+</head>
+<body>
+    <header class="en-tete">
+        <a class="logo" href="index.html">k<span>dou</span></a>
+        <nav class="navigation">
+            <ul>
+                <li><a href="index.html">Accueil</a></li>
+                <li><a href="missions.html">Missions</a></li>
+                <li><a class="actif" href="requetes.html">Requêtes</a></li>
+                <li><a href="bilan.html">Bilan</a></li>
+            </ul>
+        </nav>
+        <a class="bouton-rapport" href="rapport-web.html">Rapport Web</a>
+    </header>
+
+    <main class="conteneur">
+        <div class="carte">
+            <h1>Indicateurs stratégiques et requêtes SQL</h1>
+            <p style="text-align:center">Voici les indicateurs (questions 2 à 5 de l'étape 2) élaborés pour analyser la rentabilité et l'impact écologique de KDou.</p>
+        </div>
+
+        <div class="carte">
+            <h2>Indicateur 2 : CA total généré avec les fournisseurs de l'UE</h2>
+            <p><strong>Objectif :</strong> connaître le montant total des ventes issues de produits européens.</p>
+            <p><strong>Intérêt :</strong> privilégier les fournisseurs de l'UE permet de limiter l'impact lié au transport lointain.</p>
+            </table>
+            <div class="bloc-sql">
+                <p class="etiquette">Code SQL :</p>
+                <pre><code>SELECT SUM(DC.Quantité * (P.CoutAchat * C.CoefMarge) * (1 - DC.[Remise (%)]) ) AS CA_Total_UE
+FROM ((((DetailCommande AS DC
+INNER JOIN Produit AS P ON DC.[Réf produit] = P.RefProd)
+INNER JOIN Categorie AS C ON P.CodeCateg = C.CodeCateg)
+INNER JOIN Fournisseur AS F ON P.NoFour = F.NoFour)
+INNER JOIN Pays ON F.NoPays = Pays.NoPays)
+WHERE Pays.UE = 'Membre';</code></pre>
+            </div>
+        </div>
+
+        <div class="carte">
+            <h2>Indicateur 3 : CA annuel pour desserts ou boissons</h2>
+            <p><strong>Objectif :</strong> chiffre d'affaires annuel généré pour les catégories desserts ou boissons.</p>
+            <p><strong>Intérêt :</strong> analyser la rentabilité de ces familles de produits phares sur l'année.</p>
+            <div class="bloc-sql">
+                <p class="etiquette">Code SQL :</p>
+                <pre><code>
+SELECT Year(Cmd.DateCde) AS Annee, SUM(DC.Quantité * (P.CoutAchat * C.CoefMarge) * (1 - DC.[Remise (%)]) ) AS CA_Annuel
+FROM (((Commande AS Cmd
+INNER JOIN DetailCommande AS DC ON Cmd.[N° commande] = DC.[N° commande])
+INNER JOIN Produit AS P ON DC.[Réf produit] = P.RefProd)
+INNER JOIN Categorie AS C ON P.CodeCateg = C.CodeCateg)
+WHERE C.NomCateg = 'Desserts' OR C.NomCateg = 'Boissons'
+GROUP BY Year(Cmd.DateCde);</code></pre>
+            </div>
+        </div>
+
+        <div class="carte">
+            <h2>Indicateur 4 : produits carnés non commandés</h2>
+            <p><strong>Objectif :</strong> calculer le nombre de produits carnés (viande) qui n'ont fait l'objet d'aucune commande.</p>
+            <p><strong>Intérêt :</strong> identifier les produits à forte empreinte écologique qui ne se vendent pas, pour optimiser le catalogue.</p>
+            <div class="bloc-sql"></div>  
+                <p class="etiquette">Code SQL :</p>
+                <pre><code>SELECT COUNT(P.RefProd) AS Nb_Viandes_Non_Commandees
+FROM Produit AS P
+INNER JOIN Categorie AS C ON P.CodeCateg = C.CodeCateg
+WHERE C.NomCateg = 'Viandes' AND P.RefProd NOT IN (SELECT [Réf produit] FROM DetailCommande);</code></pre>
+            </div>
+        </div>
+
+        <div class="carte">
+            <h2>Indicateur 5 : clients pilotes et partenaires</h2>
+            <p><strong>Objectif :</strong> vérifier si les clients pilotes d'un réseau partenaire ont autant de commandes que les clients partenaires.</p>
+            <p><strong>Intérêt :</strong> évaluer l'efficacité de l'organisation logistique des livraisons groupées.</p>
+            <div class="bloc-sql">
+                <p class="etiquette">Code SQL :</p>
+                <pre><code>SELECT C.CodeCli, C.Societe
+SELECT Pilote.Societe AS Client_Pilote, Partenaire.Societe AS Client_Partenaire
+FROM Clientele AS Pilote INNER JOIN Clientele AS Partenaire ON Pilote.CodeCli = Partenaire.CodeCliPart
+WHERE (SELECT Count(*) FROM Commande WHERE CodeCli = Pilote.CodeCli) = (SELECT Count(*) FROM Commande WHERE CodeCli = Partenaire.CodeCli);</code></pre>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bas-de-page">
+        <a class="logo" href="index.html">k<span>dou</span></a>
+        <div>
+            <p>Ce site est un compte rendu au format page web, réalisé dans le cadre de la SAE. Il présente nos missions d'analyse de la base de données de KDou, nos requêtes SQL et notre bilan.</p>
+            <p class="credit">Équipe : Mustafa Berjaoui / Ilyes Masaoudi / Yassine El Ghazi / Yanis Meziane</p>
+        </div>
+        <div>
+            <strong>Pages :</strong>
+            <ul>
+                <li><a href="index.html">Accueil</a></li>
+                <li><a href="missions.html">Missions</a></li>
+                <li><a href="requetes.html">Requêtes</a></li>
+                <li><a href="bilan.html">Bilan</a></li>
+                <li><a href="rapport-web.html">Rapport Web</a></li>
+            </ul>
+        </div>
+    </footer>
+</body>
+</html>
